@@ -1,36 +1,32 @@
+/* style.css with power-up display, level-up flash, and pause button */
+
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Bangers&display=swap');
 
-/* === Full page background === */
 body {
-  margin: 0;
-  height: 100vh;
-  background-image: url('bg.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 100vh;
+  margin: 0;
   font-family: 'Press Start 2P', cursive;
+  background: url('bg.png') no-repeat center center fixed;
+  background-size: cover;
   color: #eee;
   overflow: hidden;
 }
 
-/* === Main Game Wrapper === */
 #main-game-wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  background-color: rgba(58, 63, 71, 0.85);
+  background-color: rgba(0, 0, 0, 0.75);
   border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
   width: 440px;
 }
 
-/* === Game Header === */
 #game-header {
   width: 100%;
   display: flex;
@@ -46,10 +42,10 @@ body {
   color: #FFD700;
   text-shadow:
     -2px -2px 0 #8B0000,
-    2px -2px 0 #8B0000,
-    -2px 2px 0 #8B0000,
-    2px 2px 0 #8B0000,
-    4px 4px 0 #FFA500;
+     2px -2px 0 #8B0000,
+    -2px  2px 0 #8B0000,
+     2px  2px 0 #8B0000,
+     4px  4px 0 #FFA500;
   letter-spacing: 2px;
   white-space: nowrap;
 }
@@ -76,7 +72,6 @@ body {
   transform: translateY(0);
 }
 
-/* === Game Container === */
 #game-container {
   position: relative;
   width: 400px;
@@ -92,7 +87,6 @@ canvas {
   display: block;
 }
 
-/* === Game Info === */
 #game-info {
   display: flex;
   justify-content: space-around;
@@ -100,27 +94,35 @@ canvas {
   margin-top: 15px;
   font-size: 1.1em;
   color: #eee;
+  flex-wrap: wrap;
 }
 
-/* === Pause Button === */
+#game-info div {
+  margin: 5px 0;
+}
+
+#shield-status {
+  color: #00FFFF;
+}
+
 #pause-button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  font-size: 1em;
+  margin-top: 10px;
+  padding: 8px 16px;
   font-family: 'Press Start 2P', cursive;
-  background-color: #444;
-  color: white;
+  font-size: 0.8em;
+  background-color: #FFA500;
+  color: black;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
   transition: background-color 0.3s ease;
 }
 
 #pause-button:hover {
-  background-color: #666;
+  background-color: #e69500;
 }
 
-/* === Game Over Screen === */
 #game-over-screen {
   position: absolute;
   top: 0;
@@ -128,7 +130,7 @@ canvas {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.85);
-  display: none;
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -137,6 +139,7 @@ canvas {
   text-align: center;
   border-radius: 8px;
   z-index: 10;
+  display: none;
 }
 
 #game-over-screen h2 {
@@ -169,35 +172,26 @@ canvas {
   transform: translateY(1px);
 }
 
-/* === Level Flash === */
 #level-flash {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-family: 'Bangers', cursive;
-  font-size: 3.5em;
+  background-color: rgba(0, 0, 0, 0.85);
   color: #FFD700;
-  text-shadow:
-    -2px -2px 0 #8B0000,
-    2px -2px 0 #8B0000,
-    -2px 2px 0 #8B0000,
-    2px 2px 0 #8B0000,
-    4px 4px 0 #FFA500;
-  pointer-events: none;
-  display: none;
+  font-size: 2em;
+  font-family: 'Bangers', cursive;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px #FFD700;
   z-index: 20;
-  user-select: none;
-  animation: flashFade 1.5s ease-out forwards;
+  display: none;
+  animation: flashInOut 1.5s ease forwards;
 }
 
-@keyframes flashFade {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1.3);
-  }
+@keyframes flashInOut {
+  0% { opacity: 0; transform: scale(0.5) translate(-50%, -50%); }
+  50% { opacity: 1; transform: scale(1.2) translate(-50%, -50%); }
+  100% { opacity: 0; transform: scale(1) translate(-50%, -50%); }
 }
+
