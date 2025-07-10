@@ -39,7 +39,7 @@ player.img.src = 'dog-bonk.png';
 
 // --- NEW: Image declarations for obstacles ---
 const greenCarImg = new Image();
-greenCarImg.src = 'greencar.png'; // Make sure this matches your actual filename and path
+greenCarImg.src = 'green.png'; // Make sure this matches your actual filename and path
 
 const redCarImg = new Image();
 redCarImg.src = 'redcar.png'; // Make sure this matches your actual filename and path
