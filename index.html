@@ -79,6 +79,7 @@
 
 <section>
   <h2>Bonk the Dog Game</h2>
+  <p>Click the dog to BONK!</p>
   <canvas id="gameCanvas" class="game-canvas" width="300" height="300"></canvas>
 </section>
 
@@ -128,19 +129,24 @@
   const gameCtx = gameCanvas.getContext("2d");
   const dogImg = new Image();
   dogImg.src = "dog-bonk.png";
-  let dogX = 100, dogY = 100;
+  let dogWidth = 100;
+  let dogHeight = 100;
+  let dogX = (gameCanvas.width - dogWidth) / 2;
+  let dogY = (gameCanvas.height - dogHeight) / 2;
   const bonkSound = document.getElementById("bonkSound");
+
   function drawGame() {
-    gameCtx.clearRect(0, 0, 300, 300);
-    gameCtx.drawImage(dogImg, dogX, dogY, 80, 80);
+    gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+    gameCtx.drawImage(dogImg, dogX, dogY, dogWidth, dogHeight);
   }
+
   gameCanvas.addEventListener("click", function(e) {
     const rect = gameCanvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    if (x > dogX && x < dogX + 80 && y > dogY && y < dogY + 80) {
-      dogX = Math.random() * 220;
-      dogY = Math.random() * 220;
+    if (x > dogX && x < dogX + dogWidth && y > dogY && y < dogY + dogHeight) {
+      dogX = Math.random() * (gameCanvas.width - dogWidth);
+      dogY = Math.random() * (gameCanvas.height - dogHeight);
       bonkSound.currentTime = 0;
       bonkSound.play();
       gameCanvas.style.transform = 'scale(0.95)';
@@ -148,8 +154,12 @@
     }
     drawGame();
   });
+
   dogImg.onload = drawGame;
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
