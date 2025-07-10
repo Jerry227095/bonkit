@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WAGBONK - We're All Gonna Bonk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Rubik Mono One', monospace;
+      background: black;
+      color: #00ffcc;
+      overflow-x: hidden;
+    }
+    canvas {
+      position: fixed;
+      top: 0; left: 0;
+      z-index: -1;
+    }
+    header {
+      padding: 60px 20px;
+      color: white;
+      text-align: center;
+    }
+    h1 { font-size: 3em; margin-bottom: 0; }
+    .bonk-btn {
+      background: #ff0066;
+      color: white;
+      padding: 15px 30px;
+      margin-top: 20px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    section { padding: 40px 20px; text-align: center; }
+    .tokenomics, .roadmap {
+      max-width: 800px;
+      margin: auto;
+      background: rgba(34, 34, 34, 0.9);
+      padding: 20px;
+      border-radius: 20px;
+    }
+    .footer {
+      background: #111;
+      padding: 30px;
+      font-size: 0.9em;
+      text-align: center;
+    }
+    a { color: #00ffcc; text-decoration: none; }
+    .game-canvas { border: 4px solid #ff0066; background: #222; margin: 20px auto; display: block; }
+    #meme-canvas { max-width: 100%; border: 2px dashed #00ffcc; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<canvas id="bonkCanvas"></canvas>
+
+<header>
+  <h1>WAGBONK</h1>
+  <p>We're All Gonna Bonk 💥</p>
+  <button class="bonk-btn" onclick="window.location='https://twitter.com/search?q=WAGBONK'">Join the BONK</button>
+</header>
+
+<section class="tokenomics">
+  <h2>Tokenomics</h2>
+  <p>🔥 1 Trillion Total Supply</p>
+  <p>🚀 90% Fair Launched</p>
+  <p>💧 5% Liquidity Locked</p>
+  <p>👻 5% for Memes, Magic, and Mayhem</p>
+</section>
+
+<section class="roadmap">
+  <h2>Roadmap</h2>
+  <ul style="list-style:none; padding-left: 0;">
+    <li>✅ Phase 1: Stealth Launch & Chaos</li>
+    <li>🔥 Phase 2: Meme Invasion & Twitter Raids</li>
+    <li>🚀 Phase 3: WAGBONK NFTs, Airdrops, and Degen Staking</li>
+    <li>🌕 Phase 4: Bonk the Moon</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Live Price</h2>
+  <iframe src="https://dexscreener.com/solana/placeholder" width="100%" height="400" style="border:none;"></iframe>
+</section>
+
+<section>
+  <h2>Bonk the Dog Game</h2>
+  <canvas id="gameCanvas" class="game-canvas" width="300" height="300"></canvas>
+</section>
+
+<section>
+  <h2>Meme Generator</h2>
+  <select id="memeTemplate">
+    <option value="https://i.imgur.com/y1DqgYq.jpeg">Degen Rise</option>
+    <option value="https://i.imgur.com/y57kK1y.jpeg">Bonk Face</option>
+  </select><br><br>
+  <input type="text" id="topText" placeholder="Top text"/><br><br>
+  <input type="text" id="bottomText" placeholder="Bottom text"/><br><br>
+  <button class="bonk-btn" onclick="generateMeme()">Generate Meme</button><br><br>
+  <canvas id="meme-canvas" width="400" height="400"></canvas>
+</section>
+
+<div class="footer">
+  <p>⚠️ Nothing here is financial advice. Just vibes. $WAGBONK to the stratosphere.</p>
+</div>
+
+<script>
+  const canvas = document.getElementById('bonkCanvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  for (let i = 0; i < 150; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      radius: Math.random() * 2 + 1,
+      dx: (Math.random() - 0.5) * 0.5,
+      dy: (Math.random() - 0.5) * 0.5
+    });
+  }
+  function drawParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ffcc';
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fill();
+      p.x += p.dx; p.y += p.dy;
+      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+    });
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  // Game
+  const gameCanvas = document.getElementById("gameCanvas");
+  const gameCtx = gameCanvas.getContext("2d");
+  const dogImg = new Image();
+  dogImg.src = "./dog-bonk.png";
+  let dogX = 100, dogY = 100;
+  function drawGame() {
+    gameCtx.clearRect(0, 0, 300, 300);
+    gameCtx.drawImage(dogImg, dogX, dogY, 80, 80);
+  }
+  gameCanvas.addEventListener("click", function(e) {
+    const rect = gameCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    if (x > dogX && x < dogX + 80 && y > dogY && y < dogY + 80) {
+      dogX = Math.random() * 220;
+      dogY = Math.random() * 220;
+    }
+    drawGame();
+  });
+  dogImg.onload = drawGame;
+
+  // Meme Generator
+  function generateMeme() {
+    const canvas = document.getElementById("meme-canvas");
+    const ctx = canvas.getContext("2d");
+    const topText = document.getElementById("topText").value;
+    const bottomText = document.getElementById("bottomText").value;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = document.getElementById("memeTemplate").value;
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white";
+      ctx.strokeStyle = "black";
+      ctx.font = "bold 24px sans-serif";
+      ctx.textAlign = "center";
+      ctx.lineWidth = 3;
+      ctx.strokeText(topText, canvas.width / 2, 30);
+      ctx.fillText(topText, canvas.width / 2, 30);
+      ctx.strokeText(bottomText, canvas.width / 2, canvas.height - 10);
+      ctx.fillText(bottomText, canvas.width / 2, canvas.height - 10);
+    };
+  }
+</script>
+
+</body>
+</html>
