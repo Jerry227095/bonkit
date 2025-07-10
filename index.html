@@ -36,7 +36,7 @@
       cursor: pointer;
     }
     section { padding: 40px 20px; text-align: center; }
-    .tokenomics, .roadmap {
+    .roadmap {
       max-width: 800px;
       margin: auto;
       background: rgba(34, 34, 34, 0.9);
@@ -50,8 +50,7 @@
       text-align: center;
     }
     a { color: #00ffcc; text-decoration: none; }
-    .game-canvas { border: 4px solid #ff0066; background: #222; margin: 20px auto; display: block; }
-    #meme-canvas { max-width: 100%; border: 2px dashed #00ffcc; margin-top: 10px; }
+    .game-canvas { border: 4px solid #ff0066; background: #222; margin: 20px auto; display: block; transition: transform 0.1s ease-in-out; }
   </style>
 </head>
 <body>
@@ -61,24 +60,15 @@
 <header>
   <h1>WAGBONK</h1>
   <p>We're All Gonna Bonk 💥</p>
-  <button class="bonk-btn" onclick="window.location='https://twitter.com/search?q=WAGBONK'">Join the BONK</button>
+  <button class="bonk-btn" onclick="window.location='https://x.com/wagbonk'">Join the WAGBonk</button>
 </header>
-
-<section class="tokenomics">
-  <h2>Tokenomics</h2>
-  <p>🔥 1 Trillion Total Supply</p>
-  <p>🚀 90% Fair Launched</p>
-  <p>💧 5% Liquidity Locked</p>
-  <p>👻 5% for Memes, Magic, and Mayhem</p>
-</section>
 
 <section class="roadmap">
   <h2>Roadmap</h2>
   <ul style="list-style:none; padding-left: 0;">
     <li>✅ Phase 1: Stealth Launch & Chaos</li>
     <li>🔥 Phase 2: Meme Invasion & Twitter Raids</li>
-    <li>🚀 Phase 3: WAGBONK NFTs, Airdrops, and Degen Staking</li>
-    <li>🌕 Phase 4: Bonk the Moon</li>
+    <li>🌕 Phase 3: Bonk the Moon</li>
   </ul>
 </section>
 
@@ -92,21 +82,11 @@
   <canvas id="gameCanvas" class="game-canvas" width="300" height="300"></canvas>
 </section>
 
-<section>
-  <h2>Meme Generator</h2>
-  <select id="memeTemplate">
-    <option value="https://i.imgur.com/y1DqgYq.jpeg">Degen Rise</option>
-    <option value="https://i.imgur.com/y57kK1y.jpeg">Bonk Face</option>
-  </select><br><br>
-  <input type="text" id="topText" placeholder="Top text"/><br><br>
-  <input type="text" id="bottomText" placeholder="Bottom text"/><br><br>
-  <button class="bonk-btn" onclick="generateMeme()">Generate Meme</button><br><br>
-  <canvas id="meme-canvas" width="400" height="400"></canvas>
-</section>
-
 <div class="footer">
   <p>⚠️ Nothing here is financial advice. Just vibes. $WAGBONK to the stratosphere.</p>
 </div>
+
+<audio id="bonkSound" src="https://freesound.org/data/previews/341/341695_6262460-lq.mp3"></audio>
 
 <script>
   // Particle Background
@@ -147,8 +127,9 @@
   const gameCanvas = document.getElementById("gameCanvas");
   const gameCtx = gameCanvas.getContext("2d");
   const dogImg = new Image();
-  dogImg.src = "dog-bonk.png"; // Make sure this file is uploaded
+  dogImg.src = "dog-bonk.png";
   let dogX = 100, dogY = 100;
+  const bonkSound = document.getElementById("bonkSound");
   function drawGame() {
     gameCtx.clearRect(0, 0, 300, 300);
     gameCtx.drawImage(dogImg, dogX, dogY, 80, 80);
@@ -160,35 +141,16 @@
     if (x > dogX && x < dogX + 80 && y > dogY && y < dogY + 80) {
       dogX = Math.random() * 220;
       dogY = Math.random() * 220;
+      bonkSound.currentTime = 0;
+      bonkSound.play();
+      gameCanvas.style.transform = 'scale(0.95)';
+      setTimeout(() => gameCanvas.style.transform = 'scale(1)', 100);
     }
     drawGame();
   });
   dogImg.onload = drawGame;
-
-  // Meme Generator
-  function generateMeme() {
-    const canvas = document.getElementById("meme-canvas");
-    const ctx = canvas.getContext("2d");
-    const topText = document.getElementById("topText").value;
-    const bottomText = document.getElementById("bottomText").value;
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = document.getElementById("memeTemplate").value;
-    img.onload = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "white";
-      ctx.strokeStyle = "black";
-      ctx.font = "bold 24px sans-serif";
-      ctx.textAlign = "center";
-      ctx.lineWidth = 3;
-      ctx.strokeText(topText, canvas.width / 2, 30);
-      ctx.fillText(topText, canvas.width / 2, 30);
-      ctx.strokeText(bottomText, canvas.width / 2, canvas.height - 10);
-      ctx.fillText(bottomText, canvas.width / 2, canvas.height - 10);
-    };
-  }
 </script>
 
 </body>
 </html>
+
