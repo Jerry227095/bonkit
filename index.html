@@ -14,7 +14,6 @@
         </div>
 
         <div id="game-container">
-            <!-- 🟡 GAME INFO MOVED ABOVE CANVAS -->
             <div id="game-info">
                 <div>Lives: <span id="lives">3</span></div>
                 <div>Score: <span id="score">0</span></div>
@@ -23,6 +22,10 @@
 
             <canvas id="gameCanvas" width="400" height="400"></canvas>
 
+            <!-- 🔔 Level-Up Animation Overlay -->
+            <div id="level-flash">LEVEL 1</div>
+
+            <!-- 💀 Game Over Screen -->
             <div id="game-over-screen">
                 <h2 id="game-over-text"></h2>
                 <p>Final Score: <span id="final-score">0</span></p>
@@ -30,6 +33,10 @@
             </div>
         </div>
     </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
 
     <script src="script.js"></script>
 </body>
