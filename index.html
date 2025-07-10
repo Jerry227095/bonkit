@@ -15,6 +15,7 @@
             font-family: 'Press Start 2P', cursive; /* A pixel-art font if you can link it */
             color: #eee;
             flex-direction: column;
+            overflow: hidden; /* Prevent scrollbars if canvas is larger than viewport */
         }
         canvas {
             background-color: #333; /* Dark background for the game area */
@@ -28,12 +29,12 @@
             font-size: 1.2em;
         }
         #game-over-screen {
-            position: absolute;
+            position: fixed; /* Use fixed for full screen overlay */
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.85); /* Slightly darker overlay */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -61,9 +62,7 @@
     <div id="game-info">
         Lives: <span id="lives">3</span> | Score: <span id="score">0</span>
     </div>
-    <canvas id="gameCanvas" width="600" height="400"></canvas>
-
-    <div id="game-over-screen">
+    <canvas id="gameCanvas" width="700" height="600"></canvas> <div id="game-over-screen">
         <h2 id="game-over-text">GAME OVER!</h2>
         <p>Final Score: <span id="final-score">0</span></p>
         <button id="restart-button">Play Again?</button>
@@ -77,19 +76,18 @@
         const tileSize = 40; // Size of our grid cells
         const gameWidth = canvas.width;
         const gameHeight = canvas.height;
+        const numLanes = gameHeight / tileSize; // Number of horizontal lanes
 
         // Player (Dog)
         const player = {
             x: gameWidth / 2 - tileSize / 2, // Start in the middle of the bottom road
-            y: gameHeight - tileSize,
+            y: gameHeight - tileSize, // Start on the bottom-most lane
             width: tileSize,
             height: tileSize,
             speed: tileSize, // Moves one tile at a time
             img: new Image()
         };
-        // Ensure your dog-bonk.png is in the same directory as index.html
-        // Or provide a correct relative path if it's in a folder (e.g., 'images/dog-bonk.png')
-        player.img.src = "dog-bonk.png"; 
+        player.img.src = "dog-bonk.png"; // Ensure this path is correct!
 
         let lives = 3;
         let score = 0;
@@ -102,10 +100,110 @@
         const livesSpan = document.getElementById('lives');
         const scoreSpan = document.getElementById('score');
 
+        // --- Lane Definitions ---
+        // Each lane describes its type, direction of obstacles, and speed
+        // y: top Y-coordinate of the lane
+        // type: 'road', 'safe'
+        // obstacles: array of obstacle objects {x, width, speed, color}
+        const lanes = [];
+
+        // Bottom safe zone (start)
+        lanes.push({ y: gameHeight - tileSize, type: 'safe', color: '#555' }); // Start lane
+        lanes.push({ y: gameHeight - (2 * tileSize), type: 'road', direction: 'left', speed: 2, obstacles: [] });
+        lanes.push({ y: gameHeight - (3 * tileSize), type: 'road', direction: 'right', speed: 1.5, obstacles: [] });
+        lanes.push({ y: gameHeight - (4 * tileSize), type: 'safe', color: '#555' }); // Middle safe lane
+        lanes.push({ y: gameHeight - (5 * tileSize), type: 'road', direction: 'left', speed: 2.5, obstacles: [] });
+        lanes.push({ y: gameHeight - (6 * tileSize), type: 'road', direction: 'right', speed: 1, obstacles: [] });
+        lanes.push({ y: gameHeight - (7 * tileSize), type: 'road', direction: 'left', speed: 3, obstacles: [] });
+        lanes.push({ y: gameHeight - (8 * tileSize), type: 'safe', color: '#555' }); // Another safe lane
+        lanes.push({ y: gameHeight - (9 * tileSize), type: 'road', direction: 'right', speed: 2, obstacles: [] });
+        lanes.push({ y: gameHeight - (10 * tileSize), type: 'road', direction: 'left', speed: 1.8, obstacles: [] });
+        lanes.push({ y: 0, type: 'safe', color: '#555' }); // Top safe zone (goal)
+
+        // Populate obstacles for road lanes
+        lanes.forEach(lane => {
+            if (lane.type === 'road') {
+                const numObstacles = Math.floor(Math.random() * 3) + 2; // 2 to 4 obstacles
+                for (let i = 0; i < numObstacles; i++) {
+                    const obstacleWidth = tileSize * (Math.floor(Math.random() * 2) + 1); // 1 or 2 tiles wide
+                    const startOffset = Math.random() * gameWidth; // Random starting position
+                    let obstacleColor;
+                    // Different hammer colors!
+                    const colorRand = Math.random();
+                    if (colorRand < 0.33) obstacleColor = '#FF6347'; // Tomato Red Hammer
+                    else if (colorRand < 0.66) obstacleColor = '#ADD8E6'; // Light Blue Hammer
+                    else obstacleColor = '#90EE90'; // Light Green Hammer
+
+                    lane.obstacles.push({
+                        x: startOffset + (i * gameWidth / numObstacles), // Spread them out
+                        y: lane.y,
+                        width: obstacleWidth,
+                        height: tileSize,
+                        speed: lane.speed,
+                        color: obstacleColor
+                    });
+                }
+            }
+        });
+
         // --- Drawing Functions ---
         function drawPlayer() {
-            // Draw the dog image
             ctx.drawImage(player.img, player.x, player.y, player.width, player.height);
+        }
+
+        function drawLanes() {
+            lanes.forEach(lane => {
+                // Draw lane background
+                if (lane.type === 'safe') {
+                    ctx.fillStyle = lane.color; // Safe zone color
+                    ctx.fillRect(0, lane.y, gameWidth, tileSize);
+                } else if (lane.type === 'road') {
+                    ctx.fillStyle = '#444'; // Road color
+                    ctx.fillRect(0, lane.y, gameWidth, tileSize);
+                    // Draw dashed lines for road separation
+                    ctx.strokeStyle = '#666';
+                    ctx.lineWidth = 2;
+                    const lineDashLength = 10;
+                    const lineGapLength = 10;
+                    ctx.setLineDash([lineDashLength, lineGapLength]);
+                    ctx.beginPath();
+                    ctx.moveTo(0, lane.y + tileSize / 2);
+                    ctx.lineTo(gameWidth, lane.y + tileSize / 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]); // Reset line dash
+                }
+
+                // Draw obstacles (hammers)
+                lane.obstacles.forEach(obstacle => {
+                    ctx.fillStyle = obstacle.color; // Hammer color
+                    ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                    // Optional: Draw a subtle hammer shape on top of the rectangle
+                    ctx.fillStyle = '#333'; // Handle color
+                    ctx.fillRect(obstacle.x + obstacle.width / 2 - 5, obstacle.y + obstacle.height / 2, 10, obstacle.height / 2);
+                    ctx.fillStyle = '#666'; // Head detail
+                    ctx.fillRect(obstacle.x + obstacle.width / 4, obstacle.y + obstacle.height / 4, obstacle.width / 2, obstacle.height / 2);
+                });
+            });
+        }
+
+        function updateObstacles() {
+            lanes.forEach(lane => {
+                if (lane.type === 'road') {
+                    lane.obstacles.forEach(obstacle => {
+                        if (lane.direction === 'left') {
+                            obstacle.x -= obstacle.speed;
+                            if (obstacle.x + obstacle.width < 0) {
+                                obstacle.x = gameWidth; // Wrap around to right
+                            }
+                        } else { // 'right'
+                            obstacle.x += obstacle.speed;
+                            if (obstacle.x > gameWidth) {
+                                obstacle.x = -obstacle.width; // Wrap around to left
+                            }
+                        }
+                    });
+                }
+            });
         }
 
         function updateGameInfo() {
@@ -124,26 +222,51 @@
             lives = 3;
             score = 0;
             player.x = gameWidth / 2 - tileSize / 2;
-            player.y = gameHeight - tileSize;
+            player.y = gameHeight - tileSize; // Reset to bottom lane
             gameActive = true;
             gameOverScreen.style.display = 'none';
             updateGameInfo();
+            // Reinitialize obstacles for a fresh game (optional, but good for randomness)
+            lanes.forEach(lane => {
+                if (lane.type === 'road') {
+                    lane.obstacles = []; // Clear existing
+                    const numObstacles = Math.floor(Math.random() * 3) + 2;
+                    for (let i = 0; i < numObstacles; i++) {
+                        const obstacleWidth = tileSize * (Math.floor(Math.random() * 2) + 1);
+                        const startOffset = Math.random() * gameWidth;
+                        let obstacleColor;
+                        const colorRand = Math.random();
+                        if (colorRand < 0.33) obstacleColor = '#FF6347';
+                        else if (colorRand < 0.66) obstacleColor = '#ADD8E6';
+                        else obstacleColor = '#90EE90';
+
+                        lane.obstacles.push({
+                            x: startOffset + (i * gameWidth / numObstacles),
+                            y: lane.y,
+                            width: obstacleWidth,
+                            height: tileSize,
+                            speed: lane.speed,
+                            color: obstacleColor
+                        });
+                    }
+                }
+            });
             gameLoop(); // Restart the game loop
         }
 
         // --- Input Handling ---
         document.addEventListener('keydown', (e) => {
-            if (!gameActive) return; // Don't allow movement if game is over
+            if (!gameActive) return;
+
+            // Store previous position for score logic
+            const prevPlayerY = player.y;
 
             switch (e.key) {
                 case 'ArrowUp':
                     player.y = Math.max(0, player.y - player.speed);
-                    score += 10; // Simple score for moving forward
                     break;
                 case 'ArrowDown':
                     player.y = Math.min(gameHeight - player.height, player.y + player.speed);
-                    score -= 5; // Penalize moving back, simple example
-                    if (score < 0) score = 0; // Don't let score go negative
                     break;
                 case 'ArrowLeft':
                     player.x = Math.max(0, player.x - player.speed);
@@ -152,15 +275,52 @@
                     player.x = Math.min(gameWidth - player.width, player.x + player.speed);
                     break;
             }
+
+            // Update score based on forward movement
+            if (player.y < prevPlayerY) { // Moved up
+                score += 10;
+            }
             updateGameInfo();
-            // TODO: Add logic for reaching top/winning
-            if (player.y === 0) { // Reached the top!
+
+            // Check if reached top (goal)
+            if (player.y === 0) {
                 gameOver("YOU BONKED IT!");
-                // For a proper Frogger, you'd reset player position and increment level here
             }
         });
 
         restartButton.addEventListener('click', resetGame);
+
+        // --- Collision Detection (Basic structure - will be refined) ---
+        function checkCollision() {
+            // Get the current lane the player is in
+            const currentPlayerLane = lanes.find(lane =>
+                player.y >= lane.y && player.y < lane.y + tileSize
+            );
+
+            if (currentPlayerLane && currentPlayerLane.type === 'road') {
+                for (const obstacle of currentPlayerLane.obstacles) {
+                    // Simple AABB collision detection
+                    if (player.x < obstacle.x + obstacle.width &&
+                        player.x + player.width > obstacle.x &&
+                        player.y < obstacle.y + obstacle.height &&
+                        player.y + player.height > obstacle.y) {
+                        // Collision detected!
+                        lives--;
+                        updateGameInfo();
+                        if (lives <= 0) {
+                            gameOver("GAME OVER!");
+                        } else {
+                            // Reset player position after collision
+                            player.x = gameWidth / 2 - tileSize / 2;
+                            player.y = gameHeight - tileSize;
+                        }
+                        return true; // Collision occurred
+                    }
+                }
+            }
+            return false; // No collision
+        }
+
 
         // --- Game Loop ---
         function gameLoop() {
@@ -169,9 +329,14 @@
             // Clear canvas
             ctx.clearRect(0, 0, gameWidth, gameHeight);
 
+            // Update game elements
+            updateObstacles();
+            checkCollision(); // Check for collisions in each frame
+
             // Draw game elements
-            // TODO: Draw roads, water, obstacles
+            drawLanes();
             drawPlayer();
+
 
             // Request next frame
             requestAnimationFrame(gameLoop);
@@ -183,11 +348,10 @@
             gameLoop();
         };
 
-        // If for some reason the image doesn't load (e.g., bad path),
-        // you might want a fallback or error message.
+        // Fallback if image fails to load
         player.img.onerror = () => {
             console.error("Failed to load player image: dog-bonk.png");
-            // Optionally, draw a red square or some fallback
+            // Draw a red square as fallback
             ctx.fillStyle = 'red';
             ctx.fillRect(player.x, player.y, player.width, player.height);
             updateGameInfo();
@@ -196,7 +360,6 @@
     </script>
 </body>
 </html>
-
 </body>
 </html>
 
