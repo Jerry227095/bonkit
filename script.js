@@ -27,6 +27,19 @@ const restartButton = document.getElementById('restart-button');
 const livesSpan = document.getElementById('lives');
 const scoreSpan = document.getElementById('score');
 
+// --- Sound Effects ---
+// Make sure these paths are correct and files are in your repo!
+const hopSound = new Audio('hop.mp3');
+const bonkSound = new Audio('bonk.mp3');
+const dingSound = new Audio('ding.mp3'); // For reaching the goal
+const loseSound = new Audio('lose.mp3'); // For game over
+
+// Set initial volume (optional, adjust as needed)
+hopSound.volume = 0.5;
+bonkSound.volume = 0.7;
+dingSound.volume = 0.6;
+loseSound.volume = 0.8;
+
 // --- Lane Definitions ---
 const lanes = [];
 
@@ -143,6 +156,7 @@ function gameOver(message) {
     gameOverText.textContent = message;
     finalScoreSpan.textContent = score;
     gameOverScreen.style.display = 'flex';
+    loseSound.play(); // Play lose sound
 }
 
 function resetGame() {
@@ -190,15 +204,23 @@ document.addEventListener('keydown', (e) => {
     switch (e.key) {
         case 'ArrowUp':
             player.y = Math.max(0, player.y - player.speed);
+            hopSound.currentTime = 0; // Rewind to start, in case it's still playing
+            hopSound.play(); // Play hop sound
             break;
         case 'ArrowDown':
             player.y = Math.min(gameHeight - player.height, player.y + player.speed);
+            hopSound.currentTime = 0; // Rewind to start
+            hopSound.play(); // Play hop sound
             break;
         case 'ArrowLeft':
             player.x = Math.max(0, player.x - player.speed);
+            hopSound.currentTime = 0; // Rewind to start
+            hopSound.play(); // Play hop sound
             break;
         case 'ArrowRight':
             player.x = Math.min(gameWidth - player.width, player.x + player.speed);
+            hopSound.currentTime = 0; // Rewind to start
+            hopSound.play(); // Play hop sound
             break;
     }
 
@@ -209,6 +231,7 @@ document.addEventListener('keydown', (e) => {
 
     if (player.y === 0) {
         gameOver("YOU BONKED IT!");
+        dingSound.play(); // Play ding sound for reaching goal
     }
 });
 
@@ -229,6 +252,7 @@ function checkCollision() {
 
                 lives--;
                 updateGameInfo();
+                bonkSound.play(); // Play bonk sound
                 if (lives <= 0) {
                     gameOver("GAME OVER!");
                 } else {
@@ -268,5 +292,5 @@ player.img.onload = () => {
 player.img.onerror = () => {
     console.error("Failed to load player image: dog-bonk.png - Make sure path is correct! Drawing red square fallback.");
     updateGameInfo();
-    ameLoop(); // Start the game loop even if image fails, drawing red square
-}; //
+    gameLoop(); // Start the game loop even if image fails, drawing red square
+};//
