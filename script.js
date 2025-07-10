@@ -1,3 +1,6 @@
+// Final attempt to force GitHub Pages refresh - [Current Date/Time, e.g., 2025-07-10 17:45 EDT]
+// script.js with image obstacles, power-ups, and pause/resume functionality
+// ... (rest of your code)
 // script.js with image obstacles, power-ups, and pause/resume functionality
 
 const canvas = document.getElementById('gameCanvas');
