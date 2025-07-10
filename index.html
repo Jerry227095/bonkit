@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Frogger Bonk - WAGBONK Edition</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <div id="main-game-wrapper">
@@ -12,13 +12,15 @@
             <div id="game-title">WAGBONK</div>
             <a id="join-button" href="https://x.com/wagbonk" target="_blank">JOIN WAGBONK</a>
         </div>
-        
+
         <div id="game-container">
+            <!-- 🟡 GAME INFO MOVED ABOVE CANVAS -->
             <div id="game-info">
                 <div>Lives: <span id="lives">3</span></div>
                 <div>Score: <span id="score">0</span></div>
                 <div>Level: <span id="current-level">1</span></div>
             </div>
+
             <canvas id="gameCanvas" width="400" height="400"></canvas>
 
             <div id="game-over-screen">
@@ -26,6 +28,9 @@
                 <p>Final Score: <span id="final-score">0</span></p>
                 <button id="restart-button">Play Again</button>
             </div>
-        </div> </div> <script src="script.js"></script>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
