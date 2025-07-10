@@ -192,4 +192,81 @@ document.addEventListener('keydown', (e) => {
             player.y = Math.max(0, player.y - player.speed);
             break;
         case 'ArrowDown':
-            player.
+            player.y = Math.min(gameHeight - player.height, player.y + player.speed);
+            break;
+        case 'ArrowLeft':
+            player.x = Math.max(0, player.x - player.speed);
+            break;
+        case 'ArrowRight':
+            player.x = Math.min(gameWidth - player.width, player.x + player.speed);
+            break;
+    }
+
+    if (player.y < prevPlayerY) {
+        score += 10;
+    }
+    updateGameInfo();
+
+    if (player.y === 0) {
+        gameOver("YOU BONKED IT!");
+    }
+});
+
+restartButton.addEventListener('click', resetGame);
+
+// --- Collision Detection ---
+function checkCollision() {
+    const currentPlayerLane = lanes.find(lane =>
+        player.y >= lane.y && player.y < lane.y + tileSize
+    );
+
+    if (currentPlayerLane && currentPlayerLane.type === 'road') {
+        for (const obstacle of currentPlayerLane.obstacles) {
+            if (player.x < obstacle.x + obstacle.width &&
+                player.x + player.width > obstacle.x &&
+                player.y < obstacle.y + obstacle.height &&
+                player.y + player.height > obstacle.y) {
+
+                lives--;
+                updateGameInfo();
+                if (lives <= 0) {
+                    gameOver("GAME OVER!");
+                } else {
+                    player.x = gameWidth / 2 - tileSize / 2;
+                    player.y = gameHeight - tileSize;
+                }
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// --- Game Loop ---
+function gameLoop() {
+    if (!gameActive) return;
+    console.log("Game loop executing.");
+
+    ctx.clearRect(0, 0, gameWidth, gameHeight);
+
+    updateObstacles();
+    drawLanes();
+    drawPlayer();
+
+    checkCollision();
+
+    requestAnimationFrame(gameLoop);
+}
+
+// --- Start the game ONLY after the player image loads ---
+player.img.onload = () => {
+    console.log("Player image loaded successfully! Starting game loop.");
+    updateGameInfo();
+    gameLoop();
+};
+
+player.img.onerror = () => {
+    console.error("Failed to load player image: dog-bonk.png - Make sure path is correct! Drawing red square fallback.");
+    updateGameInfo();
+    gameLoop(); // Start the game loop even if image fails, drawing red square
+};
