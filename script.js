@@ -60,14 +60,14 @@ const levelData = [
 // This acts as a template for each level
 const baseLanes = [
     { y: 0 * tileSize, type: 'safe', color: '#66CDAA' }, // Top Goal (Light Sea Green)
-    { y: 1 * tileSize, type: 'road', direction: 'left', baseSpeed: 2.5 },
-    { y: 2 * tileSize, type: 'road', direction: 'right', baseSpeed: 1.8 },
+    { y: 1 * tileSize, type: 'road', direction: 'left', baseSpeed: 0.8 }, // Reduced speed for easier start
+    { y: 2 * tileSize, type: 'road', direction: 'right', baseSpeed: 0.6 }, // Even slower
     { y: 3 * tileSize, type: 'safe', color: '#7CFC00' }, // Safe Zone (Lawn Green)
-    { y: 4 * tileSize, type: 'road', direction: 'left', baseSpeed: 1.5 },
-    { y: 5 * tileSize, type: 'road', direction: 'right', baseSpeed: 2.2 },
+    { y: 4 * tileSize, type: 'road', direction: 'left', baseSpeed: 0.7 }, // Reduced speed
+    { y: 5 * tileSize, type: 'road', direction: 'right', baseSpeed: 0.9 }, // Reduced speed
     { y: 6 * tileSize, type: 'safe', color: '#A9A9A9' }, // Safe Zone (Dark Gray)
-    { y: 7 * tileSize, type: 'road', direction: 'left', baseSpeed: 1.2 },
-    { y: 8 * tileSize, type: 'road', direction: 'right', baseSpeed: 2.8 },
+    { y: 7 * tileSize, type: 'road', direction: 'left', baseSpeed: 0.5 }, // Slowest lane
+    { y: 8 * tileSize, type: 'road', direction: 'right', baseSpeed: 1.0 }, // Slightly faster than slowest
     { y: 9 * tileSize, type: 'safe', color: '#FFD700' }, // Starting Lane (GOLD, very visible)
 ];
 
