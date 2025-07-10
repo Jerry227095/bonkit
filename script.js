@@ -60,14 +60,14 @@ const levelData = [
 // This acts as a template for each level
 const baseLanes = [
     { y: 0 * tileSize, type: 'safe', color: '#66CDAA' }, // Top Goal (Light Sea Green)
-    { y: 1 * tileSize, type: 'road', direction: 'left', baseSpeed: 2.1 }, // A good starting speed
-    { y: 2 * tileSize, type: 'road', direction: 'right', baseSpeed: 1.6 }, // Slightly slower
+    { y: 1 * tileSize, type: 'road', direction: 'left', baseSpeed: 2.0 }, // A good starting speed
+    { y: 2 * tileSize, type: 'road', direction: 'right', baseSpeed: 1.5 }, // Slightly slower
     { y: 3 * tileSize, type: 'safe', color: '#7CFC00' }, // Safe Zone (Lawn Green)
-    { y: 4 * tileSize, type: 'road', direction: 'left', baseSpeed: 1.5 }, // Similar to previous
-    { y: 5 * tileSize, type: 'road', direction: 'right', baseSpeed: 2.0 }, // A bit faster
+    { y: 4 * tileSize, type: 'road', direction: 'left', baseSpeed: 1.4 }, // Similar to previous
+    { y: 5 * tileSize, type: 'road', direction: 'right', baseSpeed: 1.9 }, // A bit faster
     { y: 6 * tileSize, type: 'safe', color: '#A9A9A9' }, // Safe Zone (Dark Gray)
-    { y: 7 * tileSize, type: 'road', direction: 'left', baseSpeed: 1.2 }, // Slowest lane for a breather
-    { y: 8 * tileSize, type: 'road', direction: 'right', baseSpeed: 2.4 }, // Fastest initial lane
+    { y: 7 * tileSize, type: 'road', direction: 'left', baseSpeed: 1.1 }, // Slowest lane for a breather
+    { y: 8 * tileSize, type: 'road', direction: 'right', baseSpeed: 2.3 }, // Fastest initial lane
     { y: 9 * tileSize, type: 'safe', color: '#FFD700' }, // Starting Lane (GOLD, very visible)
 ];
 
