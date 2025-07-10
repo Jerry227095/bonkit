@@ -1,4 +1,4 @@
-// script.js with power-ups and pause/resume functionality
+// script.js with image obstacles, power-ups, and pause/resume functionality
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,11 +37,29 @@ const player = {
 };
 player.img.src = 'dog-bonk.png';
 
+// --- NEW: Image declarations for obstacles ---
+const greenCarImg = new Image();
+greenCarImg.src = 'greencar.png'; // Make sure this matches your actual filename and path
+
+const redCarImg = new Image();
+redCarImg.src = 'redcar.png'; // Make sure this matches your actual filename and path
+
+const hammerImg = new Image();
+hammerImg.src = 'hammer.png'; // Make sure this matches your actual filename and path
+
+const logImg = new Image();
+logImg.src = 'log.png'; // Make sure this matches your actual filename and path
+
+const rockImg = new Image();
+rockImg.src = 'rock.png'; // Make sure this matches your actual filename and path
+// --- END NEW IMAGE DECLARATIONS ---
+
+
 const hopSound = new Audio('hop.mp3');
 const bonkSound = new Audio('bonk.mp3');
 const dingSound = new Audio('ding.mp3');
 const loseSound = new Audio('lose.mp3');
-const powerUpSound = new Audio('power.mp3'); // Assumes powerup.mp3 exists in the same directory
+const powerUpSound = new Audio('power.mp3'); // Assumes power.mp3 exists in the same directory
 
 const powerUps = [];
 
@@ -81,13 +99,39 @@ function initializeLevel(index) {
             lane.speed = lane.baseSpeed * currentLevel.obstacleMultiplier;
             const count = Math.floor(Math.random() * (currentLevel.maxObstacles - currentLevel.minObstacles + 1)) + currentLevel.minObstacles;
             for (let i = 0; i < count; i++) {
-                const width = tileSize * (Math.floor(Math.random() * 2) + 1);
+                let obstacleImg;
+                let obstacleWidth;
+
+                // --- NEW: Assign images based on direction/type ---
+                if (lane.direction === 'left') {
+                    // Randomly choose between green car, hammer, log, rock for left lanes
+                    const leftMovingImages = [greencarImg, hammerImg, logImg, rockImg];
+                    obstacleImg = leftMovingImages[Math.floor(Math.random() * leftMovingImages.length)];
+                } else if (lane.direction === 'right') {
+                    // Randomly choose between red car, hammer, log, rock for right lanes
+                    const rightMovingImages = [redCarImg, hammerImg, logImg, rockImg];
+                    obstacleImg = rightMovingImages[Math.floor(Math.random() * rightMovingImages.length)];
+                } else {
+                    // Fallback for unexpected lane types, though all are road/safe here
+                    const genericImages = [hammerImg, logImg, rockImg];
+                    obstacleImg = genericImages[Math.floor(Math.random() * genericImages.length)];
+                }
+
+                // Set width based on the image type or a random selection
+                // Assuming cars and logs are 80px wide (2 tiles), hammer and rock are 40px wide (1 tile)
+                if (obstacleImg === greencarImg || obstacleImg === redCarImg || obstacleImg === logImg) {
+                    obstacleWidth = tileSize * 2; // 80px wide
+                } else {
+                    obstacleWidth = tileSize; // 40px wide (hammer, rock)
+                }
+                // --- END NEW IMAGE ASSIGNMENT ---
+
                 lane.obstacles.push({
                     x: Math.random() * gameWidth,
                     y: lane.y,
-                    width,
+                    width: obstacleWidth,
                     height: tileSize,
-                    color: '#'+Math.floor(Math.random()*16777215).toString(16),
+                    img: obstacleImg, // Store the image object
                     speed: lane.speed
                 });
             }
@@ -102,11 +146,9 @@ function initializeLevel(index) {
 
 function spawnPowerUps() {
     const types = ['shield', 'double'];
-    // Filter to exclude the top goal lane (y=0) and the starting lane (y=gameHeight - tileSize)
     const eligibleSafeLanes = lanes.filter(l => l.type === 'safe' && l.y !== 0 && l.y !== (gameHeight - tileSize)); 
     eligibleSafeLanes.forEach(lane => {
-        // Increased probability for testing power-ups
-        if (Math.random() < 0.7) { // Increased from 0.3 to 0.7 for more frequent spawns
+        if (Math.random() < 0.7) { 
             const type = types[Math.floor(Math.random() * types.length)];
             powerUps.push({
                 type,
@@ -123,9 +165,8 @@ function spawnPowerUps() {
 function drawPowerUps() {
     powerUps.forEach(p => {
         if (!p.collected) {
-            ctx.fillStyle = p.type === 'shield' ? '#00FFFF' : '#FF00FF'; // Cyan for shield, Magenta for double score
+            ctx.fillStyle = p.type === 'shield' ? '#00FFFF' : '#FF00FF'; 
             ctx.fillRect(p.x, p.y, p.width, p.height);
-            // Optional: Draw text on power-up for clarity
             ctx.fillStyle = 'black';
             ctx.font = '12px "Press Start 2P"';
             ctx.textAlign = 'center';
@@ -139,8 +180,8 @@ function checkPowerUpCollision() {
     powerUps.forEach(p => {
         if (!p.collected && player.x < p.x + p.width && player.x + player.width > p.x && player.y < p.y + p.height && player.y + player.height > p.y) {
             p.collected = true;
-            powerUpSound.currentTime = 0; // Rewind to start
-            powerUpSound.play(); // Play sound when power-up is collected
+            powerUpSound.currentTime = 0; 
+            powerUpSound.play(); 
             if (p.type === 'shield') {
                 hasShield = true;
             } else if (p.type === 'double') {
@@ -148,10 +189,10 @@ function checkPowerUpCollision() {
                 clearTimeout(doubleScoreTimeout);
                 doubleScoreTimeout = setTimeout(() => {
                     doubleScore = false;
-                    updateGameInfo(); // Update info to show shield 'Off' after timeout
-                }, 10000); // Double score lasts 10 seconds
+                    updateGameInfo(); 
+                }, 10000); 
             }
-            updateGameInfo(); // Update info to show shield 'On' or 2X active
+            updateGameInfo(); 
         }
     });
 }
@@ -174,8 +215,9 @@ function drawLanes() {
         ctx.fillRect(0, lane.y, gameWidth, tileSize);
         if (lane.type === 'road') {
             lane.obstacles.forEach(ob => {
-                ctx.fillStyle = ob.color;
-                ctx.fillRect(ob.x, ob.y, ob.width, ob.height);
+                // --- NEW: Draw image instead of rect ---
+                ctx.drawImage(ob.img, ob.x, ob.y, ob.width, ob.height);
+                // --- END NEW ---
             });
         }
     });
@@ -189,21 +231,19 @@ function updateGameInfo() {
     livesSpan.textContent = lives;
     scoreSpan.textContent = score;
     currentLevelSpan.textContent = levelData[currentLevelIndex].level;
-    shieldStatus.textContent = hasShield ? 'On' : 'Off'; // Always show shield status
-    // Optional: Add indicator for double score if desired
+    shieldStatus.textContent = hasShield ? 'On' : 'Off'; 
 }
 
 function flashLevel(level) {
     levelFlash.textContent = `LEVEL ${level}`;
     levelFlash.style.display = 'block';
-    // Clear any existing animation before re-applying
     levelFlash.style.animation = 'none'; 
-    levelFlash.offsetHeight; // Trigger reflow
-    levelFlash.style.animation = null; // Re-apply animation
-    levelFlash.style.animation = 'flashInOut 1.5s ease forwards'; // Ensure animation restarts
+    levelFlash.offsetHeight; 
+    levelFlash.style.animation = null; 
+    levelFlash.style.animation = 'flashInOut 1.5s ease forwards'; 
     setTimeout(() => {
         levelFlash.style.display = 'none';
-        levelFlash.style.animation = 'none'; // Reset animation state
+        levelFlash.style.animation = 'none'; 
     }, 1500);
 }
 
@@ -212,7 +252,7 @@ function gameOver(message) {
     gameOverText.textContent = message;
     finalScoreSpan.textContent = score;
     gameOverScreen.style.display = 'flex';
-    loseSound.currentTime = 0; // Rewind to start
+    loseSound.currentTime = 0; 
     loseSound.play();
 }
 
@@ -222,7 +262,7 @@ function resetGame() {
     currentLevelIndex = 0;
     hasShield = false;
     doubleScore = false;
-    clearTimeout(doubleScoreTimeout); // Clear any active timeout
+    clearTimeout(doubleScoreTimeout); 
     gameActive = true;
     gameOverScreen.style.display = 'none';
     initializeLevel(currentLevelIndex);
@@ -235,24 +275,23 @@ function checkCollision() {
         for (const ob of lane.obstacles) {
             if (player.x < ob.x + ob.width && player.x + player.width > ob.x && player.y < ob.y + ob.height && player.y + player.height > ob.y) {
                 if (hasShield) {
-                    hasShield = false; // Shield used up
-                    updateGameInfo(); // Update shield status
-                    bonkSound.currentTime = 0; // Rewind to start
-                    bonkSound.play(); // Still play bonk sound as it's a collision
+                    hasShield = false; 
+                    updateGameInfo(); 
+                    bonkSound.currentTime = 0; 
+                    bonkSound.play(); 
                 } else {
                     lives--;
                     if (lives <= 0) {
                         gameOver('GAME OVER!');
-                        return; // Stop further execution if game over
+                        return; 
                     }
                 }
-                // Reset player position after any collision (with or without shield)
                 player.x = gameWidth / 2 - tileSize / 2;
                 player.y = gameHeight - tileSize;
                 updateGameInfo();
-                bonkSound.currentTime = 0; // Rewind to start
-                bonkSound.play(); // Play bonk sound
-                return; // Exit collision check after first hit
+                bonkSound.currentTime = 0; 
+                bonkSound.play(); 
+                return; 
             }
         }
     }
@@ -263,50 +302,47 @@ function gameLoop() {
     ctx.clearRect(0, 0, gameWidth, gameHeight);
     updateObstacles();
     drawLanes();
-    drawPowerUps(); // Draw power-ups
+    drawPowerUps(); 
     drawPlayer();
-    checkPowerUpCollision(); // Check power-up collision
+    checkPowerUpCollision(); 
     checkCollision();
     requestAnimationFrame(gameLoop);
 }
 
 document.addEventListener('keydown', e => {
     if (!gameActive || isPaused) return;
-    const oldY = player.y; // Store old Y to check for upward movement
+    const oldY = player.y; 
     
-    // Play hop sound only if the player actually moves
     let moved = false;
 
     if (e.key === 'ArrowUp') {
         player.y = Math.max(0, player.y - player.speed);
-        if (player.y < oldY) moved = true; // Moved up
+        if (player.y < oldY) moved = true; 
     } else if (e.key === 'ArrowDown') {
         player.y = Math.min(gameHeight - player.height, player.y + player.speed);
-        if (player.y > oldY) moved = true; // Moved down
+        if (player.y > oldY) moved = true; 
     } else if (e.key === 'ArrowLeft') {
         player.x = Math.max(0, player.x - player.speed);
-        moved = true; // Moved left
+        moved = true; 
     } else if (e.key === 'ArrowRight') {
         player.x = Math.min(gameWidth - player.width, player.x + player.speed);
-        moved = true; // Moved right
+        moved = true; 
     }
 
     if (moved) {
-        hopSound.currentTime = 0; // Rewind to start
+        hopSound.currentTime = 0; 
         hopSound.play();
     }
 
-    // Score for moving up
     if (player.y < oldY) {
         score += doubleScore ? 20 : 10;
     }
     updateGameInfo();
 
-    // Player reached the top
     if (player.y === 0) {
-        score += doubleScore ? 200 : 100; // Bonus for reaching top
-        dingSound.currentTime = 0; // Rewind to start
-        dingSound.play(); // Play ding sound
+        score += doubleScore ? 200 : 100; 
+        dingSound.currentTime = 0; 
+        dingSound.play(); 
         if (currentLevelIndex < levelData.length - 1) {
             currentLevelIndex++;
             initializeLevel(currentLevelIndex);
@@ -320,19 +356,37 @@ pauseButton.addEventListener('click', () => {
     isPaused = !isPaused;
     pauseButton.textContent = isPaused ? 'Resume' : 'Pause';
     if (!isPaused) {
-        gameLoop(); // Resume game loop only if not paused
+        gameLoop(); 
     }
 });
 
 restartButton.addEventListener('click', resetGame);
 
-player.img.onload = () => {
-    initializeLevel(currentLevelIndex);
-    gameLoop();
-};
 
-player.img.onerror = () => {
-    console.error("Failed to load player image. Starting game without it.");
-    initializeLevel(currentLevelIndex);
-    gameLoop();
-};
+// --- NEW: Image loading counter to ensure all images are ready before starting ---
+let imagesLoadedCount = 0;
+const totalImagesToLoad = 6; // player.img + greencarImg + redcarImg + hammerImg + logImg + rockImg
+
+function imageLoaded() {
+    imagesLoadedCount++;
+    if (imagesLoadedCount === totalImagesToLoad) {
+        initializeLevel(currentLevelIndex);
+        gameLoop();
+    }
+}
+
+// Assign the onload/onerror for all images
+player.img.onload = imageLoaded;
+player.img.onerror = () => { console.error("Failed to load player image."); imageLoaded(); }; 
+
+greencarImg.onload = imageLoaded;
+greencarImg.onerror = () => { console.error("Failed to load green car image."); imageLoaded(); };
+redCarImg.onload = imageLoaded;
+redCarImg.onerror = () => { console.error("Failed to load red car image."); imageLoaded(); };
+hammerImg.onload = imageLoaded;
+hammerImg.onerror = () => { console.error("Failed to load hammer image."); imageLoaded(); };
+logImg.onload = imageLoaded;
+logImg.onerror = () => { console.error("Failed to load log image."); imageLoaded(); };
+rockImg.onload = imageLoaded;
+rockImg.onerror = () => { console.error("Failed to load rock image."); imageLoaded(); };
+// --- END NEW IMAGE LOADING ---
