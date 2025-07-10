@@ -1,187 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>WAGBONK - We're All Gonna Bonk</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frogger Bonk - WAGBONK Edition</title>
     <style>
-        * { box-sizing: border-box; }
         body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             margin: 0;
-            font-family: 'Rubik Mono One', monospace;
-            background: black;
-            color: #00ffcc;
-            overflow-x: hidden;
+            background-color: #222;
+            font-family: 'Press Start 2P', cursive; /* A pixel-art font if you can link it */
+            color: #eee;
+            flex-direction: column;
         }
         canvas {
-            position: fixed;
-            top: 0; left: 0;
-            z-index: -1;
-        }
-        header {
-            padding: 60px 20px;
-            color: white;
-            text-align: center;
-        }
-        h1 { font-size: 3em; margin-bottom: 0; }
-        .bonk-btn {
-            background: #ff0066;
-            color: white;
-            padding: 15px 30px;
+            background-color: #333; /* Dark background for the game area */
+            border: 5px solid #00ffcc; /* WAGBONK theme color */
+            display: block;
             margin-top: 20px;
-            font-size: 1.2em;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
         }
-        section { padding: 40px 20px; text-align: center; }
-        .roadmap {
-            max-width: 800px;
-            margin: auto;
-            background: rgba(34, 34, 34, 0.9);
-            padding: 20px;
-            border-radius: 20px;
-        }
-        .footer {
-            background: #111;
-            padding: 30px;
-            font-size: 0.9em;
+        #game-info {
             text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.2em;
         }
-        a { color: #00ffcc; text-decoration: none; }
-        .game-canvas { border: 4px solid #ff0066; background: #222; margin: 20px auto; display: block; transition: transform 0.1s ease-in-out; }
-
-        /* --- NEW CSS for the Main Image --- */
-        .main-logo-container {
-            text-align: center; /* Center the image within its container */
-            padding: 20px 0; /* Add some padding */
+        #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2em;
+            text-align: center;
+            z-index: 100;
+            display: none; /* Hidden by default */
         }
-        .main-logo-container img {
-            max-width: 80%; /* Make the image responsive, up to 80% of container width */
-            height: auto; /* Maintain aspect ratio */
-            border: 5px solid #ff0066; /* Optional: add a border */
-            border-radius: 15px; /* Optional: rounded corners */
-            box-shadow: 0 0 20px rgba(255, 0, 102, 0.7); /* Optional: glowing effect */
-            transition: transform 0.2s ease-in-out; /* Smooth hover effect */
+        #game-over-screen button {
+            padding: 15px 30px;
+            font-size: 1em;
+            background-color: #00ffcc;
+            color: #222;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
         }
-        .main-logo-container img:hover {
-            transform: scale(1.03); /* Slightly enlarge on hover */
-        }
-        /* --- END NEW CSS --- */
-
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div id="game-info">
+        Lives: <span id="lives">3</span> | Score: <span id="score">0</span>
+    </div>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
 
-<canvas id="bonkCanvas"></canvas>
+    <div id="game-over-screen">
+        <h2 id="game-over-text">GAME OVER!</h2>
+        <p>Final Score: <span id="final-score">0</span></p>
+        <button id="restart-button">Play Again?</button>
+    </div>
 
-<header>
-    <h1>WAGBONK</h1>
-    <p>We're All Gonna Bonk 💥</p>
-    <button class="bonk-btn" onclick="window.location='https://x.com/wagbonk'">Join the WAGBonk</button>
-</header>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-<section class="main-logo-container">
-    <a href="https://tonystark3thousand.github.io/bonkit/">
-        <img src="dog-bonk.png" alt="WAGBONK Main Logo - Click to Bonk!" />
-    </a>
-</section>
-<section class="roadmap">
-    <h2>Roadmap</h2>
-    <ul style="list-style:none; padding-left: 0;">
-        <li>✅ Phase 1: Stealth Launch & Chaos</li>
-        <li>🔥 Phase 2: Meme Invasion & Twitter Raids</li>
-        <li>🌕 Phase 3: Bonk the Moon</li>
-    </ul>
-</section>
+        // Game settings
+        const tileSize = 40; // Size of our grid cells
+        const gameWidth = canvas.width;
+        const gameHeight = canvas.height;
 
-<section>
-    <h2>Live Price</h2>
-    <iframe src="https://dexscreener.com/solana/placeholder" width="100%" height="400" style="border:none;"></iframe>
-</section>
+        // Player (Dog)
+        const player = {
+            x: gameWidth / 2 - tileSize / 2, // Start in the middle of the bottom road
+            y: gameHeight - tileSize,
+            width: tileSize,
+            height: tileSize,
+            speed: tileSize, // Moves one tile at a time
+            img: new Image()
+        };
+        // Ensure your dog-bonk.png is in the same directory as index.html
+        // Or provide a correct relative path if it's in a folder (e.g., 'images/dog-bonk.png')
+        player.img.src = "dog-bonk.png"; 
 
-<section>
-    <h2>Bonk the Dog Game</h2>
-    <p>Click the dog to BONK!</p>
-    <canvas id="gameCanvas" class="game-canvas" width="300" height="300"></canvas>
-</section>
+        let lives = 3;
+        let score = 0;
+        let gameActive = true;
 
-<div class="footer">
-    <p>⚠️ Nothing here is financial advice. Just vibes. $WAGBONK to the stratosphere.</p>
-</div>
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameOverText = document.getElementById('game-over-text');
+        const finalScoreSpan = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-button');
+        const livesSpan = document.getElementById('lives');
+        const scoreSpan = document.getElementById('score');
 
-<audio id="bonkSound" src="https://freesound.org/data/previews/341/341695_6262460-lq.mp3"></audio>
-
-<script>
-    // Particle Background
-    const canvas = document.getElementById('bonkCanvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-    for (let i = 0; i < 150; i++) {
-        particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            radius: Math.random() * 2 + 1,
-            dx: (Math.random() - 0.5) * 0.5,
-            dy: (Math.random() - 0.5) * 0.5
-        });
-    }
-    function drawParticles() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#00ffcc';
-        particles.forEach(p => {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.fill();
-            p.x += p.dx; p.y += p.dy;
-            if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-            if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-        });
-        requestAnimationFrame(drawParticles);
-    }
-    drawParticles();
-
-    // Game
-    const gameCanvas = document.getElementById("gameCanvas");
-    const gameCtx = gameCanvas.getContext("2d");
-    const dogImg = new Image();
-    dogImg.src = "dog-bonk.png"; // This is for the game, not the main logo
-    let dogWidth = 100;
-    let dogHeight = 100;
-    let dogX = (gameCanvas.width - dogWidth) / 2;
-    let dogY = (gameCanvas.height - dogHeight) / 2;
-    const bonkSound = document.getElementById("bonkSound");
-
-    function drawGame() {
-        gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
-        gameCtx.drawImage(dogImg, dogX, dogY, dogWidth, dogHeight);
-    }
-
-    gameCanvas.addEventListener("click", function(e) {
-        const rect = gameCanvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        if (x > dogX && x < dogX + dogWidth && y > dogY && y < dogY + dogHeight) {
-            dogX = Math.random() * (gameCanvas.width - dogWidth);
-            dogY = Math.random() * (gameCanvas.height - dogHeight);
-            bonkSound.currentTime = 0;
-            bonkSound.play();
-            gameCanvas.style.transform = 'scale(0.95)';
-            setTimeout(() => gameCanvas.style.transform = 'scale(1)', 100);
+        // --- Drawing Functions ---
+        function drawPlayer() {
+            // Draw the dog image
+            ctx.drawImage(player.img, player.x, player.y, player.width, player.height);
         }
-        drawGame();
-    });
 
-    dogImg.onload = drawGame;
-</script>
+        function updateGameInfo() {
+            livesSpan.textContent = lives;
+            scoreSpan.textContent = score;
+        }
 
+        function gameOver(message) {
+            gameActive = false;
+            gameOverText.textContent = message;
+            finalScoreSpan.textContent = score;
+            gameOverScreen.style.display = 'flex';
+        }
+
+        function resetGame() {
+            lives = 3;
+            score = 0;
+            player.x = gameWidth / 2 - tileSize / 2;
+            player.y = gameHeight - tileSize;
+            gameActive = true;
+            gameOverScreen.style.display = 'none';
+            updateGameInfo();
+            gameLoop(); // Restart the game loop
+        }
+
+        // --- Input Handling ---
+        document.addEventListener('keydown', (e) => {
+            if (!gameActive) return; // Don't allow movement if game is over
+
+            switch (e.key) {
+                case 'ArrowUp':
+                    player.y = Math.max(0, player.y - player.speed);
+                    score += 10; // Simple score for moving forward
+                    break;
+                case 'ArrowDown':
+                    player.y = Math.min(gameHeight - player.height, player.y + player.speed);
+                    score -= 5; // Penalize moving back, simple example
+                    if (score < 0) score = 0; // Don't let score go negative
+                    break;
+                case 'ArrowLeft':
+                    player.x = Math.max(0, player.x - player.speed);
+                    break;
+                case 'ArrowRight':
+                    player.x = Math.min(gameWidth - player.width, player.x + player.speed);
+                    break;
+            }
+            updateGameInfo();
+            // TODO: Add logic for reaching top/winning
+            if (player.y === 0) { // Reached the top!
+                gameOver("YOU BONKED IT!");
+                // For a proper Frogger, you'd reset player position and increment level here
+            }
+        });
+
+        restartButton.addEventListener('click', resetGame);
+
+        // --- Game Loop ---
+        function gameLoop() {
+            if (!gameActive) return;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, gameWidth, gameHeight);
+
+            // Draw game elements
+            // TODO: Draw roads, water, obstacles
+            drawPlayer();
+
+            // Request next frame
+            requestAnimationFrame(gameLoop);
+        }
+
+        // --- Start the game ONLY after the player image loads ---
+        player.img.onload = () => {
+            updateGameInfo();
+            gameLoop();
+        };
+
+        // If for some reason the image doesn't load (e.g., bad path),
+        // you might want a fallback or error message.
+        player.img.onerror = () => {
+            console.error("Failed to load player image: dog-bonk.png");
+            // Optionally, draw a red square or some fallback
+            ctx.fillStyle = 'red';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            updateGameInfo();
+            gameLoop(); // Still start the game even if image fails
+        };
+    </script>
 </body>
 </html>
 
