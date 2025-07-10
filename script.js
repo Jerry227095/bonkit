@@ -23,7 +23,7 @@ const finalScoreSpan = document.getElementById('final-score');
 const restartButton = document.getElementById('restart-button');
 const livesSpan = document.getElementById('lives');
 const scoreSpan = document.getElementById('score');
-const currentLevelSpan = document('current-level');
+const currentLevelSpan = document.getElementById('current-level');
 const shieldStatus = document.getElementById('shield-status');
 const levelFlash = document.getElementById('level-flash');
 
