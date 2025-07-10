@@ -41,7 +41,7 @@ const hopSound = new Audio('hop.mp3');
 const bonkSound = new Audio('bonk.mp3');
 const dingSound = new Audio('ding.mp3');
 const loseSound = new Audio('lose.mp3');
-const powerUpSound = new Audio('powerup.mp3'); // Assuming you have a powerup sound
+const powerUpSound = new Audio('power.mp3'); // Assumes powerup.mp3 exists in the same directory
 
 const powerUps = [];
 
@@ -139,6 +139,7 @@ function checkPowerUpCollision() {
     powerUps.forEach(p => {
         if (!p.collected && player.x < p.x + p.width && player.x + player.width > p.x && player.y < p.y + p.height && player.y + player.height > p.y) {
             p.collected = true;
+            powerUpSound.currentTime = 0; // Rewind to start
             powerUpSound.play(); // Play sound when power-up is collected
             if (p.type === 'shield') {
                 hasShield = true;
@@ -211,6 +212,7 @@ function gameOver(message) {
     gameOverText.textContent = message;
     finalScoreSpan.textContent = score;
     gameOverScreen.style.display = 'flex';
+    loseSound.currentTime = 0; // Rewind to start
     loseSound.play();
 }
 
@@ -235,6 +237,7 @@ function checkCollision() {
                 if (hasShield) {
                     hasShield = false; // Shield used up
                     updateGameInfo(); // Update shield status
+                    bonkSound.currentTime = 0; // Rewind to start
                     bonkSound.play(); // Still play bonk sound as it's a collision
                 } else {
                     lives--;
@@ -247,6 +250,7 @@ function checkCollision() {
                 player.x = gameWidth / 2 - tileSize / 2;
                 player.y = gameHeight - tileSize;
                 updateGameInfo();
+                bonkSound.currentTime = 0; // Rewind to start
                 bonkSound.play(); // Play bonk sound
                 return; // Exit collision check after first hit
             }
@@ -331,7 +335,4 @@ player.img.onerror = () => {
     console.error("Failed to load player image. Starting game without it.");
     initializeLevel(currentLevelIndex);
     gameLoop();
-};
-  initializeLevel(currentLevelIndex);
-  gameLoop();
 };
