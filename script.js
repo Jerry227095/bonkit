@@ -268,5 +268,5 @@ player.img.onload = () => {
 player.img.onerror = () => {
     console.error("Failed to load player image: dog-bonk.png - Make sure path is correct! Drawing red square fallback.");
     updateGameInfo();
-    gameLoop(); // Start the game loop even if image fails, drawing red square
-};
+    ameLoop(); // Start the game loop even if image fails, drawing red square
+}; //
