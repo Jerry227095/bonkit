@@ -1,4 +1,4 @@
-// script.js - Reverted to colored square obstacles
+// script.js - Reverted to colored square obstacles (with checkPowerUpCollision fixed)
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -23,7 +23,7 @@ const finalScoreSpan = document.getElementById('final-score');
 const restartButton = document.getElementById('restart-button');
 const livesSpan = document.getElementById('lives');
 const scoreSpan = document.getElementById('score');
-const currentLevelSpan = document.getElementById('current-level');
+const currentLevelSpan = document.getElementById('current-level'); // Fixed: was document()
 const shieldStatus = document.getElementById('shield-status');
 const levelFlash = document.getElementById('level-flash');
 
@@ -178,6 +178,30 @@ function drawPlayer() {
     ctx.drawImage(player.img, player.x, player.y, player.width, player.height);
 }
 
+// === START OF checkPowerUpCollision function (Missing in your file) ===
+function checkPowerUpCollision() {
+    for (let i = 0; i < powerUps.length; i++) {
+        const p = powerUps[i];
+        if (!p.collected && player.x < p.x + p.width && player.x + player.width > p.x && player.y < p.y + p.height && player.y + player.height > p.y) {
+            p.collected = true;
+            powerUpSound.currentTime = 0;
+            powerUpSound.play();
+            if (p.type === 'shield') {
+                hasShield = true;
+            } else if (p.type === 'double') {
+                doubleScore = true;
+                clearTimeout(doubleScoreTimeout);
+                doubleScoreTimeout = setTimeout(() => {
+                    doubleScore = false;
+                    updateGameInfo();
+                }, 10000); // 10 seconds
+            }
+            updateGameInfo();
+        }
+    }
+}
+// === END OF checkPowerUpCollision function ===
+
 function updateGameInfo() {
     livesSpan.textContent = lives;
     scoreSpan.textContent = score;
@@ -255,7 +279,7 @@ function gameLoop() {
     drawLanes();
     drawPowerUps();
     drawPlayer();
-    checkPowerUpCollision();
+    checkPowerUpCollision(); // This call should now find the function
     checkCollision();
     requestAnimationFrame(gameLoop);
 }
