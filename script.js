@@ -97,11 +97,11 @@ function initializeLevel(index) {
                 let obstacleWidth, obstacleHeight;
 
                 if (lane.direction === 'right') {
-                    obstacleType = Math.random() < 0.5 ? 'redcar' : 'greencar';
+                    obstacleType = Math.random() < 0.5 ? 'redcar' : 'log'; // Replaced greencar with log
                     obstacleWidth = tileSize * 2;
                     obstacleHeight = tileSize;
                 } else {
-                    const types = ['hammer', 'log', 'rock'];
+                    const types = ['hammer', 'greencar', 'rock']; // Replaced log with greencar
                     obstacleType = types[Math.floor(Math.random() * types.length)];
                     obstacleWidth = tileSize;
                     obstacleHeight = tileSize;
@@ -364,5 +364,3 @@ player.img.onerror = () => {
 obstacleImages.redcar.onerror = () => console.error("Failed to load redcar.png");
 obstacleImages.greencar.onerror = () => console.error("Failed to load greencar.png");
 obstacleImages.hammer.onerror = () => console.error("Failed to load hammer.png");
-obstacleImages.log.onerror = () => console.error("Failed to load log.png");
-obstacleImages.rock.onerror = () => console.error("Failed to load rock.png");
