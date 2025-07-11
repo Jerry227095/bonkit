@@ -1,5 +1,3 @@
-// script.js - Reverted to colored square obstacles (with checkPowerUpCollision fixed)
-
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -23,7 +21,7 @@ const finalScoreSpan = document.getElementById('final-score');
 const restartButton = document.getElementById('restart-button');
 const livesSpan = document.getElementById('lives');
 const scoreSpan = document.getElementById('score');
-const currentLevelSpan = document.getElementById('current-level'); // Fixed: was document()
+const currentLevelSpan = document.getElementById('current-level');
 const shieldStatus = document.getElementById('shield-status');
 const levelFlash = document.getElementById('level-flash');
 
@@ -37,7 +35,19 @@ const player = {
 };
 player.img.src = 'dog-bonk.png';
 
-// Removed obstacle image declarations
+// Load obstacle images
+const obstacleImages = {
+    redcar: new Image(),
+    greencar: new Image(),
+    hammer: new Image(),
+    log: new Image(),
+    rock: new Image()
+};
+obstacleImages.redcar.src = 'redcar.png';
+obstacleImages.greencar.src = 'greencar.png';
+obstacleImages.hammer.src = 'hammer.png';
+obstacleImages.log.src = 'log.png';
+obstacleImages.rock.src = 'rock.png';
 
 const hopSound = new Audio('hop.mp3');
 const bonkSound = new Audio('bonk.mp3');
@@ -83,27 +93,26 @@ function initializeLevel(index) {
             lane.speed = lane.baseSpeed * currentLevel.obstacleMultiplier;
             const count = Math.floor(Math.random() * (currentLevel.maxObstacles - currentLevel.minObstacles + 1)) + currentLevel.minObstacles;
             for (let i = 0; i < count; i++) {
-                // Obstacles are back to colored squares
-                let obstacleColor = '#DC143C'; // Default red for obstacles
-                let obstacleWidth = tileSize; // Default 1 tile width
+                let obstacleType;
+                let obstacleWidth, obstacleHeight;
 
-                if (lane.direction === 'left') {
-                    obstacleColor = '#FF8C00'; // Orange for left-moving
-                } else if (lane.direction === 'right') {
-                    obstacleColor = '#4682B4'; // SteelBlue for right-moving
-                }
-
-                // Randomly make some obstacles wider (like cars/logs)
-                if (Math.random() < 0.3) { // 30% chance of being a 2-tile obstacle
+                if (lane.direction === 'right') {
+                    obstacleType = Math.random() < 0.5 ? 'redcar' : 'greencar';
                     obstacleWidth = tileSize * 2;
+                    obstacleHeight = tileSize;
+                } else {
+                    const types = ['hammer', 'log', 'rock'];
+                    obstacleType = types[Math.floor(Math.random() * types.length)];
+                    obstacleWidth = tileSize;
+                    obstacleHeight = tileSize;
                 }
 
                 lane.obstacles.push({
                     x: Math.random() * gameWidth,
                     y: lane.y,
                     width: obstacleWidth,
-                    height: tileSize,
-                    color: obstacleColor, // Store the color
+                    height: obstacleHeight,
+                    type: obstacleType,
                     speed: lane.speed
                 });
             }
@@ -166,9 +175,10 @@ function drawLanes() {
         ctx.fillRect(0, lane.y, gameWidth, tileSize);
         if (lane.type === 'road') {
             lane.obstacles.forEach(ob => {
-                // Drawing colored squares again
-                ctx.fillStyle = ob.color;
-                ctx.fillRect(ob.x, ob.y, ob.width, ob.height);
+                const img = obstacleImages[ob.type];
+                if (img) {
+                    ctx.drawImage(img, ob.x, ob.y, ob.width, ob.height);
+                }
             });
         }
     });
@@ -178,7 +188,6 @@ function drawPlayer() {
     ctx.drawImage(player.img, player.x, player.y, player.width, player.height);
 }
 
-// === START OF checkPowerUpCollision function (Missing in your file) ===
 function checkPowerUpCollision() {
     for (let i = 0; i < powerUps.length; i++) {
         const p = powerUps[i];
@@ -194,13 +203,12 @@ function checkPowerUpCollision() {
                 doubleScoreTimeout = setTimeout(() => {
                     doubleScore = false;
                     updateGameInfo();
-                }, 10000); // 10 seconds
+                }, 10000);
             }
             updateGameInfo();
         }
     }
 }
-// === END OF checkPowerUpCollision function ===
 
 function updateGameInfo() {
     livesSpan.textContent = lives;
@@ -279,7 +287,7 @@ function gameLoop() {
     drawLanes();
     drawPowerUps();
     drawPlayer();
-    checkPowerUpCollision(); // This call should now find the function
+    checkPowerUpCollision();
     checkCollision();
     requestAnimationFrame(gameLoop);
 }
@@ -337,14 +345,24 @@ pauseButton.addEventListener('click', () => {
 
 restartButton.addEventListener('click', resetGame);
 
-
-// --- Player image loading: no longer waiting for other images, just the player ---
-player.img.onload = () => {
+// Image loading
+Promise.all([
+    new Promise((resolve) => { obstacleImages.redcar.onload = resolve; }),
+    new Promise((resolve) => { obstacleImages.greencar.onload = resolve; }),
+    new Promise((resolve) => { obstacleImages.hammer.onload = resolve; }),
+    new Promise((resolve) => { obstacleImages.log.onload = resolve; }),
+    new Promise((resolve) => { obstacleImages.rock.onload = resolve; }),
+    new Promise((resolve) => { player.img.onload = resolve; })
+]).then(() => {
     initializeLevel(currentLevelIndex);
     gameLoop();
-};
+});
+
 player.img.onerror = () => {
     console.error("Failed to load player image. Game cannot start without player.");
-    // Optionally, show an error message on screen
 };
-// --- END Player image loading ---
+obstacleImages.redcar.onerror = () => console.error("Failed to load redcar.png");
+obstacleImages.greencar.onerror = () => console.error("Failed to load greencar.png");
+obstacleImages.hammer.onerror = () => console.error("Failed to load hammer.png");
+obstacleImages.log.onerror = () => console.error("Failed to load log.png");
+obstacleImages.rock.onerror = () => console.error("Failed to load rock.png");
