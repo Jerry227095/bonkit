@@ -62,7 +62,22 @@ const levelData = [
     { level: 2, obstacleMultiplier: 1.2, minObstacles: 2, maxObstacles: 4 },
     { level: 3, obstacleMultiplier: 1.4, minObstacles: 3, maxObstacles: 4 },
     { level: 4, obstacleMultiplier: 1.6, minObstacles: 3, maxObstacles: 5 },
-    { level: 5, obstacleMultiplier: 1.8, minObstacles: 4, maxObstacles: 5 }
+    { level: 5, obstacleMultiplier: 1.8, minObstacles: 4, maxObstacles: 5 },
+    { level: 6, obstacleMultiplier: 2.0, minObstacles: 4, maxObstacles: 6 },
+    { level: 7, obstacleMultiplier: 2.2, minObstacles: 4, maxObstacles: 6 },
+    { level: 8, obstacleMultiplier: 2.4, minObstacles: 5, maxObstacles: 7 },
+    { level: 9, obstacleMultiplier: 2.6, minObstacles: 5, maxObstacles: 7 },
+    { level: 10, obstacleMultiplier: 2.8, minObstacles: 5, maxObstacles: 8 },
+    { level: 11, obstacleMultiplier: 3.0, minObstacles: 6, maxObstacles: 8 },
+    { level: 12, obstacleMultiplier: 3.2, minObstacles: 6, maxObstacles: 9 },
+    { level: 13, obstacleMultiplier: 3.4, minObstacles: 6, maxObstacles: 9 },
+    { level: 14, obstacleMultiplier: 3.6, minObstacles: 7, maxObstacles: 10 },
+    { level: 15, obstacleMultiplier: 3.8, minObstacles: 7, maxObstacles: 10 },
+    { level: 16, obstacleMultiplier: 4.0, minObstacles: 7, maxObstacles: 11 },
+    { level: 17, obstacleMultiplier: 4.2, minObstacles: 8, maxObstacles: 11 },
+    { level: 18, obstacleMultiplier: 4.4, minObstacles: 8, maxObstacles: 12 },
+    { level: 19, obstacleMultiplier: 4.6, minObstacles: 8, maxObstacles: 12 },
+    { level: 20, obstacleMultiplier: 4.8, minObstacles: 9, maxObstacles: 13 }
 ];
 
 const baseLanes = [
@@ -97,11 +112,11 @@ function initializeLevel(index) {
                 let obstacleWidth, obstacleHeight;
 
                 if (lane.direction === 'right') {
-                    obstacleType = Math.random() < 0.5 ? 'redcar' : 'log'; // Replaced greencar with log
+                    obstacleType = Math.random() < 0.5 ? 'redcar' : 'log';
                     obstacleWidth = tileSize * 2;
                     obstacleHeight = tileSize;
                 } else {
-                    const types = ['hammer', 'greencar', 'rock']; // Replaced log with greencar
+                    const types = ['hammer', 'greencar', 'rock'];
                     obstacleType = types[Math.floor(Math.random() * types.length)];
                     obstacleWidth = tileSize;
                     obstacleHeight = tileSize;
@@ -364,3 +379,5 @@ player.img.onerror = () => {
 obstacleImages.redcar.onerror = () => console.error("Failed to load redcar.png");
 obstacleImages.greencar.onerror = () => console.error("Failed to load greencar.png");
 obstacleImages.hammer.onerror = () => console.error("Failed to load hammer.png");
+obstacleImages.log.onerror = () => console.error("Failed to load log.png");
+obstacleImages.rock.onerror = () => console.error("Failed to load rock.png");
